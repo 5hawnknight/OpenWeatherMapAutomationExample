@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>FreightWise Programming Test</title>
+
+    <script>
+        'use strict';
+
+        /**
+         * Software Developer test.
+         *
+         * Doing research and making API calls are an important part of what we do at FreightWise.  This test will
+         * demonstrate your abilities to:
+         *
+         * - Make an API call
+         * - Research an API
+         * - Do basic DOM manipulation
+         * - Parse data
+         * - Handle errors
+         * - Be creative
+         *
+         * Feel free to ask any questions you may have.  Use a lot of comments, and explain why you are doing things.
+         * Don't spend more than 1-2 hours on it - we aren't expecting a finished product, but it should work and look
+         * nice.  Feel free to use any third party libraries, and if you do so, explain why you used them instead of
+         * built in browser APIs.
+         *
+         * Instructions:
+         * - Use the axios (https://github.com/axios/axios) request library to make an API call to the OpenWeatherMap
+         *   API for Current Weather Data using this API key:  25e989bd41e3e24ce13173d8126e0fd6
+         *   We've already imported this library to get you started.
+         * - Use either async/await or Promises.
+         * - Get the weather for Brentwood, TN, and write it to the DOM using the `setResults` method below.  Be
+         *   creative and make it look nice.
+         * - Handle errors and use the `setError` method below to display the error.  Also make it look nice.
+         * - If you find any mistakes in the test, fix them, and leave a comment about what you fixed and why.
+         * - Make sure your code is readable and maintainable.
+         * - Use plenty of descriptive comments.
+         * - Make sure your code runs in the latest version of Google Chrome and Firefox (ES6 is allowed).
+         * - Make your code live (GitHub with GitHub pages works nice).
+         * - Send a link to your finished test to dev-team-jobs@freightwisellc.com.
+         *
+         * Feel free to add your own twist to it (completely optional).  Here are a few ideas:
+         * - Sign up for NewsAPI.org and get the Top Headlines and show them along with the weather.
+         * - Use the browser location API to get the user's current location, and show that location's weather.
+         * - Show a satellite map of the weather in Brentwood.
+         * - Request a user's phone number and send them an SMS with the weather.
+         */
+
+        
+        class OpenWeatherMapConfigs {
+            BASE_URL = 'https://api.openweathermap.org'
+            API_KEY = "795046ba9b1e28ff654228de8b76102f";
+            DEBUG = false;
+        }
+
+
+        class WeatherAPI {
+
+            constructor(_configs) {
+                this.configs = _configs;
+                this.testResults = document.getElementById('test-results');
+            }
+
+            async execute(city) {
+                if (this.configs.DEBUG) console.log(new Date().toISOString(), '[Test]', 'Running the test');
+                this.getCurrentWeather(city);
+            }
+            
+            getCurrentWeather(city) {
+                this.testResults.innerHTML = '';
+                axios.get(`${this.configs.BASE_URL}/data/2.5/weather?q=${city.name},${city.state},${city.country}&units=imperial&appid=${this.configs.API_KEY}`)
+                .then((response) => {
+                    if (this.configs.DEBUG) console.log(response.data);
+                    this.setResults(response.data);
+                    
+                })
+                .catch((error) => {
+                    this.setError(error,city);
+                 });
+            }
+
+            setError(error,data) {  
+                if (this.configs.DEBUG) console.log(error);
+                let div = document.createElement('div');
+                div.className = "error-message";
+                div.setAttribute("data-test-locator-error","");
+                div.innerText = `There was an error (${error.response.status} ${error.response.statusText}) trying to retrieve the weather for ${data.name}, ${data.state}. Please try the request again in a few minutes or contact support`;
+                this.testResults.append(div);
+            }
+
+            setResults(results) {
+                this.testResults.append(this.formatResultData(results));
+            }
+
+            formatResultData(json) {
+                let table = document.createElement('table');
+                table.className = "results";
+                table.setAttribute("data-tea-results-table","");
+                let tbody = document.createElement('tbody');
+                tbody.append(this.createRow("City",json.name));
+                tbody.append(this.createRow("Temperature",`${Math.round(json.main.temp)}&deg;`));
+                tbody.append(this.createRow("Feels Like",`${Math.round(json.main.feels_like)}&deg;`));
+                tbody.append(this.createRow("Humidity",`${json.main.humidity}&#37;`));
+                tbody.append(this.createRow("Wind",`${Math.round(json.wind.speed)} MPH`));
+                tbody.append(this.createRow("Cloud Cover",`${json.clouds.all}&#37;`));
+                table.append(tbody);
+                return table;
+            }
+            createRow(lablel,value) {
+                let row = document.createElement('tr');
+                let tdLablel = document.createElement('td');
+                tdLablel.innerHTML = lablel;
+                let tdValue = document.createElement('td');
+                tdValue.setAttribute("data-tea-row",`${this.formatLocator(lablel)}`);
+                tdValue.innerHTML = value;
+                row.append(tdLablel);
+                row.append(tdValue);
+                return row;
+            }
+
+            formatLocator(value) {
+               return value.toLowerCase().replaceAll(' ','-'); //todo: add regex
+            }
+        }
+    </script>
+
+    <style>
+        #button-container {
+            text-align: center;
+        }
+
+        #button-container div button {
+            margin: 0;
+            margin-top: 5px;
+            padding: 10px 18px;
+            color: white;
+            background-color: #008000;
+            border: none;
+            border-radius: 3px;
+            transition: all 200ms ease-in-out;
+            font-size: 14px;
+            width: 25%;
+            font-family: Verdana, Geneva, sans-serif;
+        }
+
+        #button-container > div > button:hover {
+            background-color: #00A000;
+        }
+
+        #button-container > div > button:active {
+            background-color: #006000;
+        }
+
+        table.results {
+            margin-top: 15px;
+            position:fixed;
+            left: 40%;
+            font-family: Verdana, Geneva, sans-serif;
+            border: 1px solid #FFFFFF;
+            width: 300px;
+            height: 200px;
+            text-align: center;
+            border-collapse: collapse;
+            }
+            table.results td, table.results th {
+            border: 1px solid #3e3939;
+            padding: 3px 2px;
+            }
+            table.results tbody td {
+            font-size: 14px;
+            }
+            table.results tr:nth-child(odd) {
+            background:#87d086;
+            }
+            table.results tfoot td {
+            font-size: 14px;
+        }
+        .error-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 3px 3px 3px 3px;
+            color: #fb010e;
+            background-color: #FFBABA;
+            font-size: 14px;
+            font-family: Verdana, Geneva, sans-serif;
+            text-align: center;
+        }
+    </style>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="button-container"></div>
+    <div id="test-results"></div>
+    <script>
+        'use strict';
+
+        /**
+         * Creates a button for kicking off the test and adds it to the DOM.
+         *
+         * @param {HTMLElement} context  the parent element to add the button to
+         * @param {Test}        test     the test to be executed
+         * @returns {HTMLElement} the button added to the test
+         
+        function addButtonForTest(context, test) {
+            let testButton = document.createElement('button');
+
+            testButton.type = 'button';
+            testButton.innerText = 'Get the Nashville Weather';
+            testButton.onclick = () => test.run();
+
+            context.appendChild(testButton);
+
+            return testButton;
+        }
+        */     
+       
+        
+        function buildCityButton(city,weatherAPI) {
+            let button = document.createElement('button');
+            button.type = 'button';
+            button.innerText = `Get the Weather for ${city.name} ${city.state}`;
+            button.onclick = () => weatherAPI.execute(city);
+            button.setAttribute("data-tea-city-weather-button",`${weatherAPI.formatLocator(city.name)}`);
+            return button;
+        }
+
+        function wrapButtonWithDiv(button) {
+            let div = document.createElement('div');
+            div.append(button);
+            return div;
+        }
+
+        const cities = [
+            {
+                name: "Brentwood",
+                state: "TN",
+                country: "USA"
+            },
+            {
+                name: "Johnson City",
+                state: "TN",
+                country: "USA"
+            },
+            {
+                name: "Hays",
+                state: "KS",
+                country: "USA"
+            }
+        ]
+        const weatherAPI = new WeatherAPI(new OpenWeatherMapConfigs());
+        const buttonContainer = document.getElementById('button-container');
+
+            cities.forEach(city => {
+                const button = buildCityButton(city,weatherAPI);
+                const wrappedButton = wrapButtonWithDiv(button);
+                buttonContainer.append(wrappedButton)
+            });
+    </script>
+</body>
+</html>

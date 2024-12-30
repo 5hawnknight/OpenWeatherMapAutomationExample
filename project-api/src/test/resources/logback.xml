@@ -1,0 +1,26 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %-5level %logger{5} %thread - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>file-name</key>
+            <defaultValue>default-logger</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${file-name}" class="ch.qos.logback.core.FileAppender">
+                <file>build/logs/${file-name}.log.txt</file>
+                <append>false</append>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%d [%thread] %-5level %logger{0} - %msg%n</pattern>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="SIFT"/>
+    </root>
+</configuration>

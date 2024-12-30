@@ -1,0 +1,5 @@
+rootProject.name = 'OpenWeatherMapAutomationExample'
+include 'project-api'
+include 'project-ui'
+include 'shared-selenium-core'
+
